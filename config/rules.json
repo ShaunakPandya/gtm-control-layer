@@ -1,0 +1,32 @@
+{
+  "defaults": {
+    "discount_threshold": 20,
+    "acv_exec_threshold": 150000,
+    "payment_terms_limit": 45,
+    "eu_requires_legal": true
+  },
+  "segment_overrides": {
+    "Enterprise": {
+      "discount_threshold": 25,
+      "acv_exec_threshold": 200000
+    },
+    "SMB": {
+      "discount_threshold": 15,
+      "acv_exec_threshold": 75000,
+      "payment_terms_limit": 30
+    }
+  },
+  "escalation_order": ["Finance", "Legal", "Security", "Exec"],
+  "rule_weights": {
+    "DISCOUNT_THRESHOLD": 2,
+    "ACV_EXEC_THRESHOLD": 3,
+    "EU_LEGAL_REVIEW": 2,
+    "PAYMENT_TERMS_LIMIT": 1,
+    "CUSTOM_SECURITY_CLAUSE": 3
+  },
+  "priority_cutoffs": {
+    "P1": 5,
+    "P2": 3,
+    "P3": 1
+  }
+}
