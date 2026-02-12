@@ -334,3 +334,52 @@ cp .env.example .env
 - **Streamlit + FastAPI split:** If deploying Streamlit and FastAPI as separate services, set `GTM_API_URL` on the Streamlit side to point to the public FastAPI URL.
 - **AI advisory in production:** Set `ADVISORY_MODE=live` and provide `ANTHROPIC_API_KEY`. The default model is `claude-sonnet-4-5-20250929` — override with `CLAUDE_MODEL` if needed.
 - **Secrets:** Never commit `.env`. Use your platform's secret management (Render env vars, Railway secrets, etc.).
+
+---
+
+## Cloud Deployment (Render + Streamlit Community Cloud)
+
+The API runs on **Render** and the UI runs on **Streamlit Community Cloud**. The Streamlit frontend calls the API server-side via httpx, so CORS is not needed.
+
+### Deploy FastAPI on Render
+
+1. Go to [Render Dashboard](https://dashboard.render.com) → **New** → **Web Service**
+2. Connect GitHub repo and select the `main` branch
+3. Configure:
+   - **Build Command:** `pip install -r requirements-api.txt`
+   - **Start Command:** `uvicorn app.api.main:app --host 0.0.0.0 --port $PORT`
+4. Set environment variables:
+   - `ADVISORY_MODE` = `mock` (or `live` with `ANTHROPIC_API_KEY` for real AI)
+   - `GTM_DB_PATH` = `/tmp/gtm.db`
+5. Deploy and note the URL (e.g. `https://gtm-api-XXXX.onrender.com`)
+
+Alternatively, use the `render.yaml` in the repo root for one-click infrastructure-as-code deployment.
+
+### Deploy Streamlit on Streamlit Community Cloud
+
+1. Go to [share.streamlit.io](https://share.streamlit.io) → **New app**
+2. Select the repo, branch `main`, main file path: `streamlit_app/app.py`
+3. Under **Advanced settings → Secrets** (TOML format):
+   ```toml
+   GTM_API_URL = "https://gtm-api-XXXX.onrender.com"
+   ```
+4. Deploy — Streamlit Cloud auto-detects `streamlit_app/requirements.txt`
+
+### Verify
+
+```bash
+# Health check
+curl https://gtm-api-XXXX.onrender.com/health
+
+# Seed sample data
+curl -X POST https://gtm-api-XXXX.onrender.com/seed \
+  -H "Content-Type: application/json" -d '{"count":50,"auto_process":true}'
+```
+
+Then open the Streamlit URL — the dashboard should show KPIs and charts.
+
+### Notes
+
+- **SQLite is ephemeral on Render free tier** — `/tmp/gtm.db` resets on each deploy/restart. Fine for demos; use hosted Postgres for persistence.
+- **Render free tier spins down after 15 min of inactivity** — first request after sleep takes ~30s. Paid tier ($7/mo) keeps it always-on.
+- **Streamlit Cloud secrets** are exposed as `os.environ`, so `api_client.py` picks up `GTM_API_URL` without code changes.

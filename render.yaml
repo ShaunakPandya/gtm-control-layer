@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: gtm-api
+    runtime: python
+    buildCommand: pip install -r requirements-api.txt
+    startCommand: uvicorn app.api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ADVISORY_MODE
+        value: mock
+      - key: GTM_DB_PATH
+        value: /tmp/gtm.db
