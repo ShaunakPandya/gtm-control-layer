@@ -7,19 +7,22 @@ import pandas as pd
 import streamlit as st
 
 CHART_HEIGHT = 320
-BAR_COLOR = "#6C63FF"
-GRID_COLOR = "#2A2D38"
-LABEL_COLOR = "#A0A3B1"
-TITLE_COLOR = "#FAFAFA"
+# Deep Ocean palette
+BAR_COLOR = "#3B82F6"  # Bright blue for readability on dark background
+BAR_HOVER_COLOR = "#1E3A8A"  # Darker navy on hover
+ACCENT_COLOR = "#F59E0B"  # Amber accent
+GRID_COLOR = "#334155"  # Dark slate grid for dark background
+LABEL_COLOR = "#94A3B8"  # Light slate labels for dark background
+TITLE_COLOR = "#E2E8F0"  # Light grey title for dark background
 
 _BASE_CONFIG = {
-    "background": "transparent",
-    "font": "sans-serif",
+    "background": "#0F172A",
+    "font": "Fira Sans, sans-serif",
     "axis": {
         "labelColor": LABEL_COLOR,
         "titleColor": LABEL_COLOR,
         "gridColor": GRID_COLOR,
-        "gridOpacity": 0.4,
+        "gridOpacity": 0.2,
         "domainColor": GRID_COLOR,
         "tickColor": GRID_COLOR,
         "labelFontSize": 11,
@@ -28,9 +31,9 @@ _BASE_CONFIG = {
     },
     "title": {
         "color": TITLE_COLOR,
-        "fontSize": 14,
+        "fontSize": 16,
         "fontWeight": 600,
-        "anchor": "middle",
+        "anchor": "start",
         "offset": 12,
     },
     "view": {
@@ -45,8 +48,13 @@ def static_bar_chart(
     y_label: str = "Count",
     title: str = "",
     height: int = CHART_HEIGHT,
+    label_mapping: dict[str, str] | None = None,
 ) -> None:
-    """Render a static vertical bar chart with consistent styling."""
+    """Render a static vertical bar chart with consistent styling and percentage tooltips.
+
+    Args:
+        label_mapping: Optional dict to map x-axis values to display labels
+    """
     if isinstance(data, dict):
         df = pd.DataFrame([{x_label: k, y_label: v} for k, v in data.items()])
     else:
@@ -55,23 +63,38 @@ def static_bar_chart(
         if x_label not in cols:
             df = df.rename(columns={cols[0]: x_label, cols[1]: y_label})
 
+    # Apply label mapping for display if provided
+    if label_mapping:
+        df["_display_label"] = df[x_label].map(lambda x: label_mapping.get(x, x))
+        display_field = "_display_label"
+    else:
+        display_field = x_label
+
     if df.empty:
         st.info("No data to display.")
         return
 
+    # Calculate percentages for tooltips
+    total = df[y_label].sum()
+    if total > 0:
+        df["Percentage"] = (df[y_label] / total * 100).round(1)
+    else:
+        df["Percentage"] = 0
+
+    # Build chart with hover interactivity
     chart = (
         alt.Chart(df)
         .mark_bar(
-            cornerRadiusTopLeft=4,
-            cornerRadiusTopRight=4,
-            size=max(8, min(40, 240 // max(len(df), 1))),
+            cornerRadiusTopLeft=6,
+            cornerRadiusTopRight=6,
+            size=max(12, min(50, 280 // max(len(df), 1))),
         )
         .encode(
             x=alt.X(
-                f"{x_label}:N",
+                f"{display_field}:N",
                 sort=alt.SortField(field=y_label, order="descending"),
                 title=None,
-                axis=alt.Axis(labelAngle=0, labelLimit=120),
+                axis=alt.Axis(labelAngle=0, labelLimit=150, labelFontWeight=500),
             ),
             y=alt.Y(
                 f"{y_label}:Q",
@@ -79,13 +102,17 @@ def static_bar_chart(
                 axis=alt.Axis(grid=True, tickMinStep=1),
             ),
             color=alt.value(BAR_COLOR),
+            opacity=alt.value(0.9),
             tooltip=[
-                alt.Tooltip(f"{x_label}:N"),
-                alt.Tooltip(f"{y_label}:Q", format=","),
+                alt.Tooltip(f"{display_field}:N", title=x_label),
+                alt.Tooltip(f"{y_label}:Q", title="Count", format=","),
+                alt.Tooltip("Percentage:Q", title="%", format=".1f"),
             ],
         )
         .properties(
-            **{"height": height, "padding": {"left": 16, "right": 16, "top": 12, "bottom": 12}, **({"title": title} if title else {})},
+            height=height,
+            padding={"left": 16, "right": 16, "top": 12, "bottom": 12},
+            **({"title": title} if title else {}),
         )
         .configure(**_BASE_CONFIG)
     )

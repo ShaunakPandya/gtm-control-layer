@@ -10,6 +10,34 @@ from api_client import seed_deals, reset_and_seed, submit_deal
 
 st.header("Submit Deal")
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Custom styling for dark theme consistency
+# ═══════════════════════════════════════════════════════════════════════════
+
+st.markdown("""
+<style>
+    /* Success/warning message styling for dark theme */
+    .stSuccess, .stWarning, .stInfo, .stError {
+        border-radius: 6px;
+    }
+
+    /* Form section styling */
+    [data-testid="stForm"] {
+        background: #1E293B;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    /* Number input and text area styling */
+    input, textarea, select {
+        background-color: #0F172A !important;
+        color: #F1F5F9 !important;
+        border-color: #334155 !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 tab_form, tab_csv, tab_generate = st.tabs(["Single Deal", "CSV Upload", "Generate Sample Data"])
 
 # ---------------------------------------------------------------------------

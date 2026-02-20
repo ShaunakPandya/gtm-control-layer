@@ -8,6 +8,41 @@ from charts import static_bar_chart
 st.header("Threshold Simulation")
 st.caption("Modify policy parameters and see the projected impact on historical deals. No data is mutated.")
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Custom metric card styling for dark theme
+# ═══════════════════════════════════════════════════════════════════════════
+
+st.markdown("""
+<style>
+    /* Metric cards dark theme */
+    [data-testid="stMetricValue"] {
+        color: #FFFFFF;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    [data-testid="stMetricLabel"] {
+        color: #F1F5F9;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    [data-testid="stMetricDelta"] {
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    /* Dark background for control sections */
+    .control-section {
+        background: #1E293B;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # ---------------------------------------------------------------------------
 # Simulation controls
 # ---------------------------------------------------------------------------

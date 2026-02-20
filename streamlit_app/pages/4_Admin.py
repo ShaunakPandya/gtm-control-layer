@@ -10,6 +10,43 @@ from charts import static_bar_chart
 
 st.header("Admin")
 
+# ═══════════════════════════════════════════════════════════════════════════
+# Custom styling for dark theme consistency
+# ═══════════════════════════════════════════════════════════════════════════
+
+st.markdown("""
+<style>
+    /* Form section styling for dark theme */
+    [data-testid="stForm"] {
+        background: #1E293B;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    /* Expander styling for dark theme */
+    [data-testid="stExpander"] {
+        background: #1E293B;
+        border: 1px solid #334155;
+        border-radius: 6px;
+    }
+
+    /* Input fields dark theme */
+    input, textarea, select {
+        background-color: #0F172A !important;
+        color: #F1F5F9 !important;
+        border-color: #334155 !important;
+    }
+
+    /* JSON viewer dark theme */
+    pre {
+        background-color: #0F172A !important;
+        border: 1px solid #334155;
+        border-radius: 6px;
+    }
+</style>
+""", unsafe_allow_html=True)
+
 tab_override, tab_history, tab_config = st.tabs(
     ["Apply Override", "Override History", "Config Viewer"]
 )
